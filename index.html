@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trova lo Smartphone Perfetto — AI Sales Assistant</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 10px;
+            border-radius: 999px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+            margin-top: -8px;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            background: #4338ca;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        /* Smooth step transition */
+        .step-panel {
+            animation: fadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .pulse-subtle {
+            animation: pulseSubtle 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseSubtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-600 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Top Header & API Key Configuration -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3.5 gap-3">
+                
+                <!-- Brand Title & Subtitle -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <img
+                            src="logo.png"
+                            alt="Logo"
+                            class="w-11 h-11 object-contain shrink-0"
+                        />
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
+                                    Trova lo Smartphone Perfetto
+                                </h1>
+                                <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-50 text-brand-700 border border-brand-200">
+                                    AI Advisor Pro
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-medium">
+                                Sistema di supporto decisionale per consulenti di vendita ed esperti tech
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Toggle API Panel Button -->
+                    <button id="mobileApiToggleBtn" type="button" onclick="toggleMobileApiBar()" class="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                        <i class="fa-solid fa-key text-brand-600"></i>
+                        <span>API Key</span>
+                    </button>
+                </div>
+
+                <!-- API Key Settings Bar -->
+                <div id="apiConfigBar" class="hidden md:flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200/90">
+                    <!-- Status Indicator Badge -->
+                    <div id="apiStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                        <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span id="apiStatusText">Verifica API...</span>
+                    </div>
+
+                    <!-- Input Field with Show/Hide -->
+                    <div class="relative flex-1 sm:w-60 min-w-[180px]">
+                        <i class="fa-solid fa-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input
+                            id="apiKeyInput"
+                            type="password"
+                            placeholder="Incolla Gemini API Key (AIza...)"
+                            autocomplete="off"
+                            class="w-full pl-8 pr-8 py-1.5 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-800 placeholder:text-slate-400"
+                        />
+                        <button
+                            type="button"
+                            onclick="toggleApiKeyVisibility()"
+                            title="Mostra/Nascondi API Key"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                        >
+                            <i id="apiKeyEyeIcon" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <!-- Save & Clear Buttons -->
+                    <button
+                        type="button"
+                        onclick="saveApiKey()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition active:scale-95 shrink-0"
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Salva Key</span>
+                    </button>
+                    <button
+                        id="clearApiKeyBtn"
+                        type="button"
+                        onclick="clearApiKey()"
+                        title="Rimuovi chiave salvata"
+                        class="hidden items-center justify-center w-7 h-7 rounded-xl text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition shrink-0"
+                    >
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- WIZARD SECTION -->
+        <section id="wizardSection" class="max-w-4xl mx-auto">
+            
+            <!-- Interactive Step Progress Bar (Steps 1 to 5) -->
+            <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-brand-600" id="stepCategoryLabel">
+                         Fase 1 di 5 • Profilo Utilizzo
+                    </span>
+                    <button type="button" onclick="resetWizard()" class="text-xs font-medium text-slate-500 hover:text-red-600 inline-flex items-center gap-1 transition">
+                        <i class="fa-solid fa-rotate-left"></i> Azzera questionario
+                    </button>
+                </div>
+
+                <!-- Step Indicators -->
+                <div class="grid grid-cols-5 gap-2 sm:gap-3 relative">
+                    <!-- Step 1 -->
+                    <button type="button" onclick="goToStep(1)" id="stepIndicator1" class="group text-left focus:outline-none">
+                        <div class="h-2 rounded-full bg-brand-600 transition-all duration-300 mb-2" id="stepBar1"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="stepBadge1" class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-brand-600 text-white shrink-0">1</span>
+                            <span id="stepLabel1" class="text-xs font-semibold text-slate-900 truncate">Uso Principale</span>
+                        </div>
+                    </button>
+
+                    <!-- Step 2 -->
+                    <button type="button" onclick="goToStep(2)" id="stepIndicator2" class="group text-left focus:outline-none">
+                        <div class="h-2 rounded-full bg-slate-200 transition-all duration-300 mb-2" id="stepBar2"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="stepBadge2" class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-slate-200 text-slate-600 shrink-0">2</span>
+                            <span id="stepLabel2" class="text-xs font-medium text-slate-500 truncate">OS & Marca</span>
+                        </div>
+                    </button>
+
+                    <!-- Step 3 -->
+                    <button type="button" onclick="goToStep(3)" id="stepIndicator3" class="group text-left focus:outline-none">
+                        <div class="h-2 rounded-full bg-slate-200 transition-all duration-300 mb-2" id="stepBar3"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="stepBadge3" class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-slate-200 text-slate-600 shrink-0">3</span>
+                            <span id="stepLabel3" class="text-xs font-medium text-slate-500 truncate">App & Giochi</span>
+                        </div>
+                    </button>
+
+                    <!-- Step 4 -->
+                    <button type="button" onclick="goToStep(4)" id="stepIndicator4" class="group text-left focus:outline-none">
+                        <div class="h-2 rounded-full bg-slate-200 transition-all duration-300 mb-2" id="stepBar4"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="stepBadge4" class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-slate-200 text-slate-600 shrink-0">4</span>
+                            <span id="stepLabel4" class="text-xs font-medium text-slate-500 truncate">Budget & Spec</span>
+                        </div>
+                    </button>
+
+                    <!-- Step 5 -->
+                    <button type="button" onclick="goToStep(5)" id="stepIndicator5" class="group text-left focus:outline-none">
+                        <div class="h-2 rounded-full bg-slate-200 transition-all duration-300 mb-2" id="stepBar5"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="stepBadge5" class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-slate-200 text-slate-600 shrink-0">5</span>
+                            <span id="stepLabel5" class="text-xs font-medium text-slate-500 truncate">Riepilogo & AI</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wizard Card Container -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+
+                <!-- ==================== STEP 1: USO PRINCIPALE ==================== -->
+                <div id="stepPanel1" class="step-panel p-6 sm:p-8">
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-bullseye"></i> Selezione Multipla Consigliata
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Come useraì lo Smartphone?
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Seleziona una o più modalità d'uso per permettere a Gemini di bilanciare processore, fotocamera e batteria.
+                        </p>
+                    </div>
+
+                    <div id="usageCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- ==================== STEP 2: SISTEMA OPERATIVO & MARCA ==================== -->
+                <div id="stepPanel2" class="step-panel p-6 sm:p-8 hidden">
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-Sliders"></i> Preferenze Ecosistema (Facoltativo)
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Sistema Operativo e Marche Preferite
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Indica hai già familiarità con un ecosistema specifico o desidera valutare determinati brand.
+                        </p>
+                    </div>
+
+                    <!-- OS Selection -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-bold text-slate-800 mb-3">
+                            1. Sistema Operativo Preferito
+                        </label>
+                        <div id="osOptionsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Brand Selection -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-bold text-slate-800">
+                                2. Marche Preferite (Selezione multipla)
+                            </label>
+                            <span class="text-xs text-slate-500">Clicca su più brand per confrontarli</span>
+                        </div>
+                        <div id="brandOptionsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== STEP 3: SOFTWARE, APP O GIOCHI SPECIFICI ==================== -->
+                <div id="stepPanel3" class="step-panel p-6 sm:p-8 hidden">
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-cubes"></i> Requisiti Software & Carico Hardware
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Software, App o Giochi Specifici
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Specifica le app chiave o i titoli gaming che utilizzi: l'AI verificherà compatibilità GPU, dissipazione termica e ottimizzazione.
+                        </p>
+                    </div>
+
+                    <!-- Custom App Input Box -->
+                    <div class="mb-6">
+                        <label for="customAppInput" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            Aggiungi un'app o gioco specifico
+                        </label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fa-solid fa-magnifying-glass-plus absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    id="customAppInput"
+                                    type="text"
+                                    placeholder="Es. Genshin Impact, CapCut, Lightroom, Call of Duty, Teams..."
+                                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); addCustomAppFromInput(); }"
+                                    class="w-full pl-10 pr-4 py-3 text-sm bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onclick="addCustomAppFromInput()"
+                                class="px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-sm transition inline-flex items-center gap-2 shrink-0"
+                            >
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Aggiungi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selected Apps Tag Cloud -->
+                    <div class="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/90 min-h-[76px]">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                App e Giochi Selezionati (<span id="selectedAppsCount">0</span>)
+                            </span>
+                            <button type="button" onclick="clearAllApps()" id="clearAppsBtn" class="hidden text-xs text-red-600 hover:underline font-medium">
+                                Rimuovi tutti
+                            </button>
+                        </div>
+                        <div id="selectedAppsContainer" class="flex flex-wrap gap-2">
+                            <!-- Active tags rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Suggestion Chips -->
+                    <div>
+                        <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                            Suggerimenti Rapidi per Categoria (Clicca per aggiungere/rimuovere)
+                        </span>
+                        <div id="suggestedAppsContainer" class="flex flex-wrap gap-2">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== STEP 4: BUDGET E SPECIFICHE TECNICHE ==================== -->
+                <div id="stepPanel4" class="step-panel p-6 sm:p-8 hidden">
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-microchip"></i> Configurazione Hardware & Fascia Prezzo
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Budget e Specifiche Tecniche Desiderate
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Imposta il tetto di spesa indicativo e i requisiti minimi di memoria e connettività.
+                        </p>
+                    </div>
+
+                    <!-- Budget Interactive Slider Box -->
+                    <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50/40 border border-slate-200 mb-7">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <label for="budgetSlider" class="text-sm font-bold text-slate-800 block">
+                                    Budget Indicativo Massimo
+                                </label>
+                                <span id="budgetTierLabel" class="text-xs font-medium text-brand-700">
+                                    Fascia Medio-Alta • Ottimo equilibrio prestazioni/fotocamera
+                                </span>
+                            </div>
+                            <div class="inline-flex items-baseline gap-1 bg-white px-4 py-2 rounded-2xl border border-brand-200 shadow-sm self-start sm:self-auto">
+                                <span class="text-xs font-semibold text-slate-400">Fino a</span>
+                                <span id="budgetValueDisplay" class="text-2xl font-extrabold text-brand-600">€650</span>
+                            </div>
+                        </div>
+
+                        <input
+                            id="budgetSlider"
+                            type="range"
+                            min="100"
+                            max="2000"
+                            step="50"
+                            value="650"
+                            oninput="updateBudgetValue(this.value)"
+                            class="w-full mb-3 bg-slate-200 rounded-lg"
+                        />
+
+                        <div class="flex justify-between text-[11px] font-semibold text-slate-400 mb-4">
+                            <span>€100 (Entry)</span>
+                            <span>€500 (Medio)</span>
+                            <span>€1000 (Top)</span>
+                            <span>€1500 (Ultra)</span>
+                            <span>€2000+ (Fold/Pro Max)</span>
+                        </div>
+
+                        <!-- Quick Budget Presets -->
+                        <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-200/70">
+                            <span class="text-xs text-slate-500 self-center mr-1 font-medium">Scelte rapide:</span>
+                            <button type="button" onclick="updateBudgetValue(250)" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-brand-400 hover:text-brand-600 transition">≤ €250 Economico</button>
+                            <button type="button" onclick="updateBudgetValue(450)" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-brand-400 hover:text-brand-600 transition">≤ €450 Best Buy</button>
+                            <button type="button" onclick="updateBudgetValue(750)" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-brand-400 hover:text-brand-600 transition">≤ €750 Medio-Alto</button>
+                            <button type="button" onclick="updateBudgetValue(1100)" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-brand-400 hover:text-brand-600 transition">≤ €1100 Flagship</button>
+                            <button type="button" onclick="updateBudgetValue(2000)" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-brand-400 hover:text-brand-600 transition">€2000+ Senza Limiti</button>
+                        </div>
+                    </div>
+
+                    <!-- Technical Specs Selectors Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Storage -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                <i class="fa-solid fa-hard-drive text-brand-600 mr-1"></i> Memoria Archiviazione
+                            </label>
+                            <div id="storageOptionsContainer" class="flex flex-col gap-2">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+
+                        <!-- RAM -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                <i class="fa-solid fa-memory text-brand-600 mr-1"></i> Memoria RAM
+                            </label>
+                            <div id="ramOptionsContainer" class="flex flex-col gap-2">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Connectivity -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                <i class="fa-solid fa-tower-cell text-brand-600 mr-1"></i> Connettività Rete
+                            </label>
+                            <div id="connectivityOptionsContainer" class="flex flex-col gap-2">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== STEP 5: RIEPILOGO DATI & INVIO AI ==================== -->
+                <div id="stepPanel5" class="step-panel p-6 sm:p-8 hidden">
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-clipboard-check"></i> Verifica Finale & Analisi AI
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Riepilogo Profilo
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Controlla i parametri raccolti prima di generare i 3 consigli personalizzati con Gemini Pro.
+                        </p>
+                    </div>
+
+                    <!-- Summary Cards Grid -->
+                    <div id="summaryGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Populated dynamically via updateSummaryView() -->
+                    </div>
+
+                    <!-- Optional Consultant / Customer Extra Notes -->
+                    <div class="mb-7">
+                        <label for="extraNotesInput" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            <i class="fa-regular fa-comment-dots text-brand-600 mr-1"></i> Note aggiuntive (Opzionale)
+                        </label>
+                        <input
+                            id="extraNotesInput"
+                            type="text"
+                            placeholder="Es. Preferisce uno schermo compatto, batteria che duri 2 giorni, ricarica wireless, eSIM..."
+                            oninput="wizardState.extraNotes = this.value"
+                            class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
+                        />
+                    </div>
+
+                    <!-- Main CTA Button & Loading State -->
+                    <div class="bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-700 rounded-3xl p-6 text-white shadow-lg shadow-brand-600/20">
+                        <div id="aiActionIdle" class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-extrabold flex items-center gap-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                                    Pronto per l'elaborazione intelligente
+                                </h3>
+                                <p class="text-xs sm:text-sm text-indigo-100 mt-0.5">
+                                    Gemini analizzerà compatibilità app, rapporto qualità/prezzo e genererà i link diretti agli store.
+                                </p>
+                            </div>
+                            <button
+                                id="generateAdviceBtn"
+                                type="button"
+                                onclick="generateSmartphoneRecommendations()"
+                                class="w-full sm:w-auto px-7 py-4 rounded-2xl bg-white text-brand-700 hover:bg-indigo-50 font-extrabold text-sm sm:text-base shadow-md transition transform active:scale-95 inline-flex items-center justify-center gap-2.5 shrink-0"
+                            >
+                                <i class="fa-solid fa-bolt text-amber-500"></i>
+                                <span>Elabora Consiglio con AI</span>
+                            </button>
+                        </div>
+
+                        <!-- Animated Loading State (Hidden by default) -->
+                        <div id="aiActionLoading" class="hidden py-4 text-center">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm mb-3">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-300"></i>
+                            </div>
+                            <h4 id="loadingStatusTitle" class="text-base sm:text-lg font-bold text-white">
+                                Analisi dei requisiti hardware e software in corso...
+                            </h4>
+                            <p id="loadingStatusSub" class="text-xs sm:text-sm text-indigo-100 mt-1">
+                                Gemini Pro sta confrontando i migliori smartphone sul mercato italiano per il budget selezionato.
+                            </p>
+                            <div class="max-w-md mx-auto mt-4 bg-white/20 h-2 rounded-full overflow-hidden">
+                                <div id="loadingProgressBar" class="bg-amber-300 h-full w-1/3 rounded-full transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wizard Footer Navigation Buttons -->
+                <div class="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+                    <button
+                        id="prevStepBtn"
+                        type="button"
+                        onclick="changeStep(-1)"
+                        class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm transition inline-flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+                    >
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                        <span>Indietro</span>
+                    </button>
+
+                    <div class="text-xs font-semibold text-slate-400 hidden sm:block" id="footerStepHint">
+                        Passo 1 di 5
+                    </div>
+
+                    <button
+                        id="nextStepBtn"
+                        type="button"
+                        onclick="changeStep(1)"
+                        class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-sm transition inline-flex items-center gap-2"
+                    >
+                        <span>Avanti</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================== RESULTS SECTION ==================== -->
+        <section id="resultsSection" class="hidden mt-8 space-y-6">
+            
+            <!-- Top Action Bar for Consultant -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+                        <i class="fa-solid fa-check-double"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Risultati Elaborati con Successo</span>
+                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                            I 3 Smartphone Consigliati per Te
+                        </h2>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button
+                        type="button"
+                        onclick="copyResultsToClipboard()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition inline-flex items-center gap-2"
+                    >
+                        <i class="fa-regular fa-copy text-brand-600"></i>
+                        <span>Copia Riepilogo</span>
+                    </button>
+                    <button
+                        type="button"
+                        onclick="editCurrentFilters()"
+                        class="px-4 py-2.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs sm:text-sm transition inline-flex items-center gap-2"
+                    >
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Modifica Filtri</span>
+                    </button>
+                    <button
+                        type="button"
+                        onclick="startNewConsultation()"
+                        class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm shadow-sm transition inline-flex items-center gap-2"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nuova Consulenza</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. SPECIAL PROMOTIONAL BANNER (HIGHLIGHTED IN AMBER/YELLOW) -->
+            <div class="pulse-subtle relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 p-5 sm:p-6 shadow-md">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-300/70 text-amber-950 text-[11px] font-extrabold uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-gift"></i> Suggerimento Strategico d'Acquisto
+                        </div>
+                        <p class="text-sm sm:text-base font-bold text-amber-950 leading-relaxed">
+                            "Un consiglio da amico: Non c'è fretta nell'acquistare proprio adesso! Ricordati che a Novembre c'è il Black Friday ed è il momento migliore per accaparrarsi questi smartphone al prezzo più basso dell'anno!"
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. PRODUCT CARDS 3-COLUMN RESPONSIVE GRID -->
+            <div id="recommendationsGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically via renderRecommendations() -->
+            </div>
+
+            <!-- Mandatory Disclaimer Footer -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-info text-brand-600 text-lg shrink-0"></i>
+                    <p class="text-xs sm:text-sm font-medium text-slate-600">
+                        I prezzi indicati sono stime di mercato aggiornate da Gemini Pro. Clicca sui link e-commerce per verificare i prezzi effettivi e le offerte attuali.
+                    </p>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 shrink-0">
+                    Link diretti verificati IT
+                </span>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-slate-200/80 bg-white py-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <div class="flex items-center gap-2 font-medium text-slate-700">
+                <i class="fa-solid fa-mobile-screen text-brand-600"></i>
+                <span>Trova lo Smartphone Perfetto — Strumento by bytestoretech.it</span>
+            </div>
+            <div>
+                Powered by <span class="font-semibold text-slate-700">ByteStoreTech</span> • Interfaccia Reattiva Single-Page
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application JavaScript -->
+    <script>
+        // ============================================================================
+        // 1. CONFIGURAZIONE E DATI STATICI DEL QUESTIONARIO
+        // ============================================================================
+        const STORAGE_KEY_NAME = 'GEMINI_API_KEY';
+        const envApiKey = ""; // Injected automatically by Canvas runtime if available
+
+        const USAGE_OPTIONS = [
+            {
+                id: 'gaming',
+                title: 'Gaming avanzato',
+                desc: 'Giochi 3D pesanti, frame rate 120Hz stabili, GPU potente e dissipazione termica.',
+                icon: 'fa-gamepad',
+                color: 'text-rose-600 bg-rose-50 border-rose-200'
+            },
+            {
+                id: 'photo_video',
+                title: 'Foto & Video di alta qualità',
+                desc: 'Sensori stabilizzati OIS, zoom ottico, ritratti nitidi, video 4K e social content.',
+                icon: 'fa-camera-retro',
+                color: 'text-purple-600 bg-purple-50 border-purple-200'
+            },
+            {
+                id: 'daily_social',
+                title: 'Uso quotidiano / Social & Browsing',
+                desc: 'Navigazione fluida, Instagram, TikTok, YouTube, streaming e ottima batteria.',
+                icon: 'fa-hashtag',
+                color: 'text-sky-600 bg-sky-50 border-sky-200'
+            },
+            {
+                id: 'work_productivity',
+                title: 'Lavoro & Produttività',
+                desc: 'Multitasking intenso, email, documenti, videochiamate nitide, sicurezza e autonomia.',
+                icon: 'fa-briefcase',
+                color: 'text-emerald-600 bg-emerald-50 border-emerald-200'
+            },
+            {
+                id: 'basic_use',
+                title: 'Uso base (chiamate/messaggi)',
+                desc: 'Semplicità d’uso, WhatsApp, telefonate chiare, affidabilità e massima durata batteria.',
+                icon: 'fa-phone-volume',
+                color: 'text-amber-600 bg-amber-50 border-amber-200'
+            }
+        ];
+
+        const OS_OPTIONS = [
+            { id: 'Nessuna preferenza', label: 'Nessuna preferenza', desc: 'Valuta sia Android che iOS', icon: 'fa-wand-magic-sparkles' },
+            { id: 'Android', label: 'Android', desc: 'Massima scelta, personalizzazione e varietà', icon: 'fa-brands fa-android' },
+            { id: 'iOS (Apple)', label: 'iOS (Apple)', desc: 'Ecosistema iPhone, semplicità e longevità', icon: 'fa-brands fa-apple' }
+        ];
+
+        const BRAND_OPTIONS = [
+            { id: 'Nessuna preferenza', label: 'Nessuna preferenza', icon: 'fa-globe' },
+            { id: 'Samsung', label: 'Samsung', icon: 'fa-mobile-screen' },
+            { id: 'Apple', label: 'Apple', icon: 'fa-brands fa-apple' },
+            { id: 'Xiaomi', label: 'Xiaomi / Redmi', icon: 'fa-bolt' },
+            { id: 'Google', label: 'Google Pixel', icon: 'fa-brands fa-google' },
+            { id: 'OnePlus', label: 'OnePlus', icon: 'fa-plus' },
+            { id: 'Honor', label: 'Honor', icon: 'fa-award' },
+            { id: 'Motorola', label: 'Motorola', icon: 'fa-m' },
+            { id: 'Realme', label: 'Realme', icon: 'fa-star' },
+            { id: 'Asus', label: 'Asus ROG / Zenfone', icon: 'fa-gamepad' },
+            { id: 'Sony', label: 'Sony Xperia', icon: 'fa-camera' },
+            { id: 'Nothing', label: 'Nothing', icon: 'fa-circle-dot' }
+        ];
+
+        const SUGGESTED_APPS = [
+            { name: 'Genshin Impact', icon: 'fa-dragon', category: 'Gaming' },
+            { name: 'Call of Duty Warzone', icon: 'fa-crosshairs', category: 'Gaming' },
+            { name: 'CapCut', icon: 'fa-scissors', category: 'Video Editing' },
+            { name: 'Adobe Lightroom', icon: 'fa-Sliders', category: 'Foto Pro' },
+            { name: 'Instagram / TikTok Pro', icon: 'fa-video', category: 'Social Creator' },
+            { name: 'Microsoft Teams & Office', icon: 'fa-briefcase', category: 'Lavoro' },
+            { name: 'WhatsApp & Telegram', icon: 'fa-comments', category: 'Messaggistica' },
+            { name: 'PUBG Mobile / Fortnite', icon: 'fa-gamepad', category: 'Gaming' },
+            { name: 'Android Auto / Apple CarPlay', icon: 'fa-car', category: 'Mobilità' },
+            { name: 'Netflix / Disney+ HDR', icon: 'fa-film', category: 'Streaming' },
+            { name: 'Canva', icon: 'fa-palette', category: 'Design' },
+            { name: 'SPID / App IO / Home Banking', icon: 'fa-building-columns', category: 'Servizi' }
+        ];
+
+        const STORAGE_OPTIONS = ['Nessuna preferenza', '128 GB', '256 GB', '512 GB', '1 TB'];
+        const RAM_OPTIONS = ['Nessuna preferenza', '4 GB', '8 GB', '12 GB', '16 GB+'];
+        const CONNECTIVITY_OPTIONS = ['5G obbligatorio', '4G sufficiente', 'Indifferente'];
+
+        // Mapping Siti Ufficiali Produttori in base alla marca
+        const OFFICIAL_BRAND_URLS = {
+            'samsung': { name: 'Sito Ufficiale Samsung Italia', url: 'https://www.samsung.com/it/' },
+            'apple': { name: 'Sito Ufficiale Apple Italia', url: 'https://www.apple.com/it/' },
+            'iphone': { name: 'Sito Ufficiale Apple Italia', url: 'https://www.apple.com/it/' },
+            'xiaomi': { name: 'Sito Ufficiale Xiaomi Italia', url: 'https://www.mi.com/it/' },
+            'redmi': { name: 'Sito Ufficiale Xiaomi Italia', url: 'https://www.mi.com/it/' },
+            'poco': { name: 'Sito Ufficiale Xiaomi Italia', url: 'https://www.mi.com/it/' },
+            'google': { name: 'Google Store Ufficiale Italia', url: 'https://store.google.com/it/' },
+            'pixel': { name: 'Google Store Ufficiale Italia', url: 'https://store.google.com/it/' },
+            'oneplus': { name: 'Sito Ufficiale OnePlus Italia', url: 'https://www.oneplus.com/it' },
+            'honor': { name: 'Sito Ufficiale Honor Italia', url: 'https://www.honor.com/it/' },
+            'motorola': { name: 'Sito Ufficiale Motorola Italia', url: 'https://www.motorola.it/' },
+            'realme': { name: 'Sito Ufficiale Realme Italia', url: 'https://www.realme.com/it/' },
+            'asus': { name: 'Sito Ufficiale Asus Italia', url: 'https://www.asus.com/it/' },
+            'sony': { name: 'Sito Ufficiale Sony Italia', url: 'https://www.sony.it/' },
+            'nothing': { name: 'Sito Ufficiale Nothing Italia', url: 'https://it.nothing.tech/' },
+            'oppo': { name: 'Sito Ufficiale OPPO Italia', url: 'https://www.oppo.com/it/' },
+            'vivo': { name: 'Sito Ufficiale Vivo Italia', url: 'https://www.vivo.com/it' }
+        };
+
+        // ============================================================================
+        // 2. STATO DELL'APPLICAZIONE (WIZARD STATE)
+        // ============================================================================
+        let currentStep = 1;
+        let lastRecommendations = [];
+
+        let wizardState = {
+            usages: ['daily_social', 'photo_video'],
+            os: 'Nessuna preferenza',
+            brands: ['Nessuna preferenza'],
+            apps: ['Instagram / TikTok Pro', 'WhatsApp & Telegram'],
+            budget: 650,
+            storage: '256 GB',
+            ram: '8 GB',
+            connectivity: '5G obbligatorio',
+            extraNotes: ''
+        };
+
+        // ============================================================================
+        // 3. INIZIALIZZAZIONE E GESTIONE CHIAVE API (localStorage)
+        // ============================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initApiKeyManager();
+            renderAllWizardOptions();
+            updateStepUI();
+        });
+
+        function initApiKeyManager() {
+            const savedKey = localStorage.getItem(STORAGE_KEY_NAME) || '';
+            const inputEl = document.getElementById('apiKeyInput');
+            if (savedKey) {
+                inputEl.value = savedKey;
+            }
+            updateApiStatusBadge();
+        }
+
+        function getActiveApiKey() {
+            const savedKey = (localStorage.getItem(STORAGE_KEY_NAME) || '').trim();
+            const inputKey = (document.getElementById('apiKeyInput')?.value || '').trim();
+            if (inputKey) return inputKey;
+            if (savedKey) return savedKey;
+            return envApiKey;
+        }
+
+        function saveApiKey() {
+            const inputEl = document.getElementById('apiKeyInput');
+            const val = inputEl.value.trim();
+            if (!val) {
+                showToast('Inserisci una chiave API Gemini valida prima di salvare.', 'warning');
+                return;
+            }
+            localStorage.setItem(STORAGE_KEY_NAME, val);
+            updateApiStatusBadge();
+            showToast('Chiave API Gemini salvata correttamente in localStorage!', 'success');
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem(STORAGE_KEY_NAME);
+            document.getElementById('apiKeyInput').value = '';
+            updateApiStatusBadge();
+            showToast('Chiave API rimossa da localStorage.', 'info');
+        }
+
+        function toggleApiKeyVisibility() {
+            const inputEl = document.getElementById('apiKeyInput');
+            const iconEl = document.getElementById('apiKeyEyeIcon');
+            if (inputEl.type === 'password') {
+                inputEl.type = 'text';
+                iconEl.className = 'fa-regular fa-eye-slash';
+            } else {
+                inputEl.type = 'password';
+                iconEl.className = 'fa-regular fa-eye';
+            }
+        }
+
+        function toggleMobileApiBar() {
+            const bar = document.getElementById('apiConfigBar');
+            bar.classList.toggle('hidden');
+            bar.classList.toggle('flex');
+        }
+
+        function updateApiStatusBadge() {
+            const savedKey = (localStorage.getItem(STORAGE_KEY_NAME) || '').trim();
+            const badge = document.getElementById('apiStatusBadge');
+            const dot = document.getElementById('apiStatusDot');
+            const text = document.getElementById('apiStatusText');
+            const clearBtn = document.getElementById('clearApiKeyBtn');
+
+            if (savedKey) {
+                badge.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                text.textContent = 'Connesso (Key Utente)';
+                clearBtn.classList.remove('hidden');
+                clearBtn.classList.add('inline-flex');
+            } else {
+                badge.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                text.textContent = 'Connesso (Ambiente AI)';
+                clearBtn.classList.add('hidden');
+                clearBtn.classList.remove('inline-flex');
+            }
+        }
+
+        // ============================================================================
+        // 4. RENDERING COMPONENTI INTERATTIVI DEL WIZARD
+        // ============================================================================
+        function renderAllWizardOptions() {
+            renderUsageCards();
+            renderOsOptions();
+            renderBrandOptions();
+            renderAppsSection();
+            updateBudgetValue(wizardState.budget);
+            renderSpecPills('storageOptionsContainer', STORAGE_OPTIONS, 'storage');
+            renderSpecPills('ramOptionsContainer', RAM_OPTIONS, 'ram');
+            renderSpecPills('connectivityOptionsContainer', CONNECTIVITY_OPTIONS, 'connectivity');
+        }
+
+        // STEP 1: Uso Principale
+        function renderUsageCards() {
+            const container = document.getElementById('usageCardsGrid');
+            container.innerHTML = USAGE_OPTIONS.map(opt => {
+                const isSelected = wizardState.usages.includes(opt.id);
+                return `
+                    <div
+                        onclick="toggleUsage('${opt.id}')"
+                        class="cursor-pointer group relative rounded-2xl p-5 border-2 transition-all duration-200 flex flex-col justify-between ${
+                            isSelected
+                                ? 'border-brand-600 bg-brand-50/50 shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-brand-300 hover:bg-slate-50/60'
+                        }"
+                    >
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-11 h-11 rounded-2xl border flex items-center justify-center text-lg ${opt.color}">
+                                    <i class="fa-solid ${opt.icon}"></i>
+                                </div>
+                                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${
+                                    isSelected
+                                        ? 'bg-brand-600 border-brand-600 text-white'
+                                        : 'border-slate-300 bg-white text-transparent group-hover:border-brand-400'
+                                }">
+                                    <i class="fa-solid fa-check text-xs"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-1">${opt.title}</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed">${opt.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleUsage(usageId) {
+            const idx = wizardState.usages.indexOf(usageId);
+            if (idx > -1) {
+                if (wizardState.usages.length === 1) {
+                    showToast('Seleziona almeno un utilizzo principale.', 'warning');
+                    return;
+                }
+                wizardState.usages.splice(idx, 1);
+            } else {
+                wizardState.usages.push(usageId);
+            }
+            renderUsageCards();
+        }
+
+        // STEP 2: Sistema Operativo & Marca
+        function renderOsOptions() {
+            const container = document.getElementById('osOptionsGrid');
+            container.innerHTML = OS_OPTIONS.map(opt => {
+                const isSelected = wizardState.os === opt.id;
+                return `
+                    <button
+                        type="button"
+                        onclick="selectOs('${opt.id}')"
+                        class="text-left p-4 rounded-2xl border-2 transition-all flex items-start gap-3.5 ${
+                            isSelected
+                                ? 'border-brand-600 bg-brand-50/50 shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300'
+                        }"
+                    >
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                            isSelected ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700'
+                        }">
+                            <i class="${opt.icon.includes('fa-brands') ? opt.icon : 'fa-solid ' + opt.icon}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-sm text-slate-900">${opt.label}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">${opt.desc}</div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectOs(osId) {
+            wizardState.os = osId;
+            // Smart brand sync if iOS is chosen
+            if (osId === 'iOS (Apple)') {
+                wizardState.brands = ['Apple'];
+            } else if (osId === 'Android' && wizardState.brands.includes('Apple')) {
+                wizardState.brands = wizardState.brands.filter(b => b !== 'Apple');
+                if (wizardState.brands.length === 0) wizardState.brands = ['Nessuna preferenza'];
+            }
+            renderOsOptions();
+            renderBrandOptions();
+        }
+
+        function renderBrandOptions() {
+            const container = document.getElementById('brandOptionsGrid');
+            container.innerHTML = BRAND_OPTIONS.map(brand => {
+                const isSelected = wizardState.brands.includes(brand.id);
+                return `
+                    <button
+                        type="button"
+                        onclick="toggleBrand('${brand.id}')"
+                        class="px-3.5 py-3 rounded-xl border-2 text-xs sm:text-sm font-semibold transition-all flex items-center justify-between gap-2 ${
+                            isSelected
+                                ? 'border-brand-600 bg-brand-600 text-white shadow-sm'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-brand-300 hover:bg-slate-50'
+                        }"
+                    >
+                        <span class="flex items-center gap-2 truncate">
+                            <i class="${brand.icon.includes('fa-brands') ? brand.icon : 'fa-solid ' + brand.icon} ${isSelected ? 'text-white' : 'text-slate-400'}"></i>
+                            <span class="truncate">${brand.label}</span>
+                        </span>
+                        ${isSelected ? '<i class="fa-solid fa-check text-[11px] shrink-0"></i>' : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleBrand(brandId) {
+            if (brandId === 'Nessuna preferenza') {
+                wizardState.brands = ['Nessuna preferenza'];
+            } else {
+                wizardState.brands = wizardState.brands.filter(b => b !== 'Nessuna preferenza');
+                const idx = wizardState.brands.indexOf(brandId);
+                if (idx > -1) {
+                    wizardState.brands.splice(idx, 1);
+                    if (wizardState.brands.length === 0) {
+                        wizardState.brands = ['Nessuna preferenza'];
+                    }
+                } else {
+                    wizardState.brands.push(brandId);
+                }
+            }
+            renderBrandOptions();
+        }
+
+        // STEP 3: App e Giochi Specifici
+        function renderAppsSection() {
+            const selectedContainer = document.getElementById('selectedAppsContainer');
+            const countSpan = document.getElementById('selectedAppsCount');
+            const clearBtn = document.getElementById('clearAppsBtn');
+
+            countSpan.textContent = wizardState.apps.length;
+
+            if (wizardState.apps.length === 0) {
+                clearBtn.classList.add('hidden');
+                selectedContainer.innerHTML = `
+                    <span class="text-xs text-slate-400 italic py-1">
+                        Nessuna app specifica indicata (verrà considerata una dotazione standard). Clicca sui suggerimenti qui sotto o scrivi nel campo sopra.
+                    </span>
+                `;
+            } else {
+                clearBtn.classList.remove('hidden');
+                selectedContainer.innerHTML = wizardState.apps.map((app, index) => `
+                    <span class="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white shadow-sm">
+                        <span>${escapeHtml(app)}</span>
+                        <button
+                            type="button"
+                            onclick="removeAppByIndex(${index})"
+                            class="w-4 h-4 rounded-full hover:bg-white/20 flex items-center justify-center transition"
+                            title="Rimuovi"
+                        >
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                    </span>
+                `).join('');
+            }
+
+            // Suggested Chips
+            const suggestedContainer = document.getElementById('suggestedAppsContainer');
+            suggestedContainer.innerHTML = SUGGESTED_APPS.map(item => {
+                const isAdded = wizardState.apps.some(a => a.toLowerCase() === item.name.toLowerCase());
+                return `
+                    <button
+                        type="button"
+                        onclick="toggleSuggestedApp('${item.name.replace(/'/g, "\\'")}')"
+                        class="px-3 py-2 rounded-xl text-xs font-semibold border transition inline-flex items-center gap-2 ${
+                            isAdded
+                                ? 'bg-brand-50 border-brand-400 text-brand-700'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                        }"
+                    >
+                        <i class="fa-solid ${item.icon} ${isAdded ? 'text-brand-600' : 'text-slate-400'}"></i>
+                        <span>${item.name}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">${item.category}</span>
+                        ${isAdded ? '<i class="fa-solid fa-check text-brand-600"></i>' : '<i class="fa-solid fa-plus text-slate-400 text-[10px]"></i>'}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function addCustomAppFromInput() {
+            const input = document.getElementById('customAppInput');
+            const raw = input.value.trim();
+            if (!raw) return;
+
+            // Support comma-separated additions
+            const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+            parts.forEach(part => {
+                const exists = wizardState.apps.some(a => a.toLowerCase() === part.toLowerCase());
+                if (!exists) {
+                    wizardState.apps.push(part);
+                }
+            });
+
+            input.value = '';
+            renderAppsSection();
+        }
+
+        function toggleSuggestedApp(appName) {
+            const idx = wizardState.apps.findIndex(a => a.toLowerCase() === appName.toLowerCase());
+            if (idx > -1) {
+                wizardState.apps.splice(idx, 1);
+            } else {
+                wizardState.apps.push(appName);
+            }
+            renderAppsSection();
+        }
+
+        function removeAppByIndex(index) {
+            wizardState.apps.splice(index, 1);
+            renderAppsSection();
+        }
+
+        function clearAllApps() {
+            wizardState.apps = [];
+            renderAppsSection();
+        }
+
+        // STEP 4: Budget & Specifiche
+        function updateBudgetValue(val) {
+            const num = parseInt(val, 10);
+            wizardState.budget = num;
+            document.getElementById('budgetSlider').value = num;
+            document.getElementById('budgetValueDisplay').textContent = num >= 2000 ? '€2000+' : `€${num}`;
+
+            const tierEl = document.getElementById('budgetTierLabel');
+            if (num <= 250) {
+                tierEl.textContent = 'Fascia Entry-Level • Ideale per uso quotidiano, social e batteria';
+            } else if (num <= 450) {
+                tierEl.textContent = 'Fascia Media (Best Buy) • Eccellente rapporto qualità/prezzo';
+            } else if (num <= 750) {
+                tierEl.textContent = 'Fascia Medio-Alta • Prestazioni elevate e comparto fotografico avanzato';
+            } else if (num <= 1150) {
+                tierEl.textContent = 'Fascia Top di Gamma (Flagship) • Nessun compromesso su foto e potenza';
+            } else {
+                tierEl.textContent = 'Fascia Ultra-Premium / Foldable • Il massimo della tecnologia mobile attuale';
+            }
+        }
+
+        function renderSpecPills(containerId, optionsArray, stateKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = optionsArray.map(option => {
+                const isSelected = wizardState[stateKey] === option;
+                return `
+                    <button
+                        type="button"
+                        onclick="selectSpecOption('${stateKey}', '${option}', '${containerId}')"
+                        class="px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-left transition flex items-center justify-between ${
+                            isSelected
+                                ? 'border-brand-600 bg-brand-50 text-brand-700 shadow-sm'
+                                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        }"
+                    >
+                        <span>${option}</span>
+                        <span class="w-4 h-4 rounded-full border flex items-center justify-center ${
+                            isSelected ? 'border-brand-600 bg-brand-600 text-white' : 'border-slate-300'
+                        }">
+                            ${isSelected ? '<i class="fa-solid fa-check text-[9px]"></i>' : ''}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectSpecOption(stateKey, value, containerId) {
+            wizardState[stateKey] = value;
+            const mapOptions = {
+                storage: STORAGE_OPTIONS,
+                ram: RAM_OPTIONS,
+                connectivity: CONNECTIVITY_OPTIONS
+            };
+            renderSpecPills(containerId, mapOptions[stateKey], stateKey);
+        }
+
+        // STEP 5: Riepilogo Dati
+        function updateSummaryView() {
+            const usageTitles = wizardState.usages.map(id => {
+                const found = USAGE_OPTIONS.find(u => u.id === id);
+                return found ? found.title : id;
+            });
+
+            const summaryContainer = document.getElementById('summaryGrid');
+            summaryContainer.innerHTML = `
+                <!-- Card 1: Uso Principale -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Uso Principale</span>
+                            <button type="button" onclick="goToStep(1)" class="text-xs font-semibold text-brand-600 hover:underline">Modifica</button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mt-1">
+                            ${usageTitles.map(t => `<span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: OS e Brand -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Sistema & Brand</span>
+                            <button type="button" onclick="goToStep(2)" class="text-xs font-semibold text-brand-600 hover:underline">Modifica</button>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-1">Sistema Operativo: <strong class="text-slate-900">${wizardState.os}</strong></p>
+                        <p class="text-xs text-slate-600">Marche: <strong class="text-slate-900">${wizardState.brands.join(', ')}</strong></p>
+                    </div>
+                </div>
+
+                <!-- Card 3: App e Giochi -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">3. App & Giochi (${wizardState.apps.length})</span>
+                            <button type="button" onclick="goToStep(3)" class="text-xs font-semibold text-brand-600 hover:underline">Modifica</button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${wizardState.apps.length > 0
+                                ? wizardState.apps.map(a => `<span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 text-xs font-semibold">${escapeHtml(a)}</span>`).join('')
+                                : '<span class="text-xs text-slate-500 italic">Nessuna app specifica selezionata</span>'
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Budget e Specifiche -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">4. Budget & Hardware</span>
+                            <button type="button" onclick="goToStep(4)" class="text-xs font-semibold text-brand-600 hover:underline">Modifica</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-y-1 text-xs">
+                            <span class="text-slate-500">Budget Max:</span>
+                            <strong class="text-brand-700 font-extrabold">${wizardState.budget >= 2000 ? '€2000+' : '€' + wizardState.budget}</strong>
+                            <span class="text-slate-500">Archiviazione:</span>
+                            <strong class="text-slate-900">${wizardState.storage}</strong>
+                            <span class="text-slate-500">RAM:</span>
+                            <strong class="text-slate-900">${wizardState.ram}</strong>
+                            <span class="text-slate-500">Connettività:</span>
+                            <strong class="text-slate-900">${wizardState.connectivity}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================================================
+        // 5. NAVIGAZIONE WIZARD
+        // ============================================================================
+        const STEP_TITLES = [
+            'Fase 1 di 5 • Profilo Utilizzo',
+            'Fase 2 di 5 • Ecosistema & Brand',
+            'Fase 3 di 5 • App, Giochi & Carico',
+            'Fase 4 di 5 • Budget & Specifiche Tecniche',
+            'Fase 5 di 5 • Riepilogo & Analisi AI'
+        ];
+
+        function changeStep(delta) {
+            const target = currentStep + delta;
+            if (target < 1 || target > 5) return;
+            goToStep(target);
+        }
+
+        function goToStep(stepNum) {
+            if (stepNum < 1 || stepNum > 5) return;
+            currentStep = stepNum;
+            if (currentStep === 5) {
+                updateSummaryView();
+            }
+            updateStepUI();
+        }
+
+        function updateStepUI() {
+            document.getElementById('stepCategoryLabel').textContent = STEP_TITLES[currentStep - 1];
+            document.getElementById('footerStepHint').textContent = `Passo ${currentStep} di 5`;
+
+            for (let i = 1; i <= 5; i++) {
+                const panel = document.getElementById(`stepPanel${i}`);
+                const bar = document.getElementById(`stepBar${i}`);
+                const badge = document.getElementById(`stepBadge${i}`);
+                const label = document.getElementById(`stepLabel${i}`);
+
+                if (i === currentStep) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+
+                if (i < currentStep) {
+                    bar.className = 'h-2 rounded-full bg-emerald-500 transition-all duration-300 mb-2';
+                    badge.className = 'w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-emerald-500 text-white shrink-0';
+                    badge.innerHTML = '<i class="fa-solid fa-check text-[9px]"></i>';
+                    label.className = 'text-xs font-semibold text-emerald-700 truncate';
+                } else if (i === currentStep) {
+                    bar.className = 'h-2 rounded-full bg-brand-600 transition-all duration-300 mb-2';
+                    badge.className = 'w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-brand-600 text-white shrink-0';
+                    badge.textContent = i;
+                    label.className = 'text-xs font-bold text-slate-900 truncate';
+                } else {
+                    bar.className = 'h-2 rounded-full bg-slate-200 transition-all duration-300 mb-2';
+                    badge.className = 'w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-slate-200 text-slate-600 shrink-0';
+                    badge.textContent = i;
+                    label.className = 'text-xs font-medium text-slate-500 truncate';
+                }
+            }
+
+            // Footer buttons state
+            const prevBtn = document.getElementById('prevStepBtn');
+            const nextBtn = document.getElementById('nextStepBtn');
+            prevBtn.disabled = currentStep === 1;
+
+            if (currentStep === 5) {
+                nextBtn.classList.add('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function resetWizard() {
+            wizardState = {
+                usages: ['daily_social'],
+                os: 'Nessuna preferenza',
+                brands: ['Nessuna preferenza'],
+                apps: [],
+                budget: 500,
+                storage: 'Nessuna preferenza',
+                ram: 'Nessuna preferenza',
+                connectivity: '5G obbligatorio',
+                extraNotes: ''
+            };
+            document.getElementById('extraNotesInput').value = '';
+            renderAllWizardOptions();
+            goToStep(1);
+            showToast('Questionario ripristinato ai valori iniziali.', 'info');
+        }
+
+        // ============================================================================
+        // 6. INTEGRAZIONE GEMINI PRO API CON JSON SCHEMA STRUTTURATO
+        // ============================================================================
+        async function fetchWithBackoff(url, options, maxRetries = 3) {
+            let delay = 1000;
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429 || response.status >= 500) {
+                        if (attempt === maxRetries) return response;
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                        continue;
+                    }
+                    return response;
+                } catch (err) {
+                    if (attempt === maxRetries) throw err;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        async function generateSmartphoneRecommendations() {
+            const idleBox = document.getElementById('aiActionIdle');
+            const loadingBox = document.getElementById('aiActionLoading');
+            const progressBar = document.getElementById('loadingProgressBar');
+            const statusTitle = document.getElementById('loadingStatusTitle');
+            const statusSub = document.getElementById('loadingStatusSub');
+
+            idleBox.classList.add('hidden');
+            loadingBox.classList.remove('hidden');
+
+            // Animated status messages
+            const loadingSteps = [
+                { pct: '35%', title: 'Analisi dei requisiti...', sub: 'Valutazione carico CPU/GPU per le app selezionate e vincoli di budget.' },
+                { pct: '68%', title: 'Selezione dei 3 migliori modelli sul mercato italiano...', sub: 'Confronto specifiche tecniche, fotocamere, autonomia e fascia prezzo in €.' },
+                { pct: '92%', title: 'Generazione motivazioni di vendita e link e-commerce...', sub: 'Preparazione delle schede comparative per il consulente.' }
+            ];
+
+            let stepIdx = 0;
+            const statusInterval = setInterval(() => {
+                if (stepIdx < loadingSteps.length) {
+                    progressBar.style.width = loadingSteps[stepIdx].pct;
+                    statusTitle.textContent = loadingSteps[stepIdx].title;
+                    statusSub.textContent = loadingSteps[stepIdx].sub;
+                    stepIdx++;
+                }
+            }, 1300);
+
+            try {
+                const usageNames = wizardState.usages.map(id => {
+                    const u = USAGE_OPTIONS.find(x => x.id === id);
+                    return u ? u.title : id;
+                });
+
+                const clientProfile = {
+                    uso_principale: usageNames,
+                    sistema_operativo_preferito: wizardState.os,
+                    marche_preferite: wizardState.brands,
+                    app_e_giochi_specifici: wizardState.apps.length > 0 ? wizardState.apps : ['Uso standard quotidiano'],
+                    budget_massimo_euro: wizardState.budget >= 2000 ? 'Oltre 2000€ (Senza limiti)' : `${wizardState.budget}€`,
+                    memoria_archiviazione: wizardState.storage,
+                    ram_desiderata: wizardState.ram,
+                    connettivita: wizardState.connectivity,
+                    note_aggiuntive: wizardState.extraNotes || 'Nessuna'
+                };
+
+                const systemInstruction = `Agisci come un Esperto Consulente Tecnologico e Analista del mercato Smartphone in Italia.
+Il tuo compito è analizzare il profilo fornito in JSON e raccomandare RIGOROSAMENTE 3 modelli di smartphone REALI, attualmente disponibili sul mercato italiano, perfettamente idonei alle esigenze espresse.
+Rispetta il budget indicato, il sistema operativo e le marche richieste.
+Differenzia i 3 consigli:
+1. "Scelta Consigliata / Top Match" (il miglior smartphone complessivo per te)
+2. "Miglior Rapporto Qualità/Prezzo" (l'opzione più intelligente che fa risparmiare senza rinunce)
+3. "Alternativa Prestazioni / Fotocamera" (un'alternativa valida o leggermente superiore per longevità/potenza).
+Scrivi sempre in italiano professionale, chiaro e persuasivo per supportare il consulente di vendita.`;
+
+                const userPrompt = `Ecco i parametri raccolti dal questionario:
+${JSON.stringify(clientProfile, null, 2)}
+
+Restituisci un array JSON con esattamente 3 smartphone consigliati.`;
+
+                const responseSchema = {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            category_badge: {
+                                type: "STRING",
+                                description: "Es. Scelta Consigliata, Miglior Qualità/Prezzo, Top Prestazioni"
+                            },
+                            brand: {
+                                type: "STRING",
+                                description: "Marca dello smartphone (es. Samsung, Apple, Xiaomi, Google, Motorola, Honor, OnePlus, Realme, Asus)"
+                            },
+                            model: {
+                                type: "STRING",
+                                description: "Modello esatto dello smartphone (es. Galaxy S24 5G, iPhone 16, Xiaomi 14T, Pixel 8a)"
+                            },
+                            specs: {
+                                type: "OBJECT",
+                                properties: {
+                                    processor: { type: "STRING", description: "Nome del SoC/Processore" },
+                                    camera: { type: "STRING", description: "Dettagli fotocamere principali" },
+                                    ram_storage: { type: "STRING", description: "Taglio RAM e Storage consigliato (es. 8GB / 256GB)" },
+                                    battery: { type: "STRING", description: "Capacità batteria e velocità ricarica" },
+                                    display: { type: "STRING", description: "Dimensione, tecnologia AMOLED/OLED e refresh rate" }
+                                },
+                                required: ["processor", "camera", "ram_storage", "battery", "display"]
+                            },
+                            reasoning: {
+                                type: "STRING",
+                                description: "Motivazione personalizzata dettagliata (3-4 frasi) sul perché questo smartphone è perfetto per l'uso e le app scelte."
+                            },
+                            estimated_price: {
+                                type: "STRING",
+                                description: "Fascia di prezzo medio attuale in Euro (es. €429 - €469)"
+                            },
+                            search_query: {
+                                type: "STRING",
+                                description: "Query esatta e pulita per cercare il telefono sugli e-commerce (es. Samsung Galaxy S24 256GB)"
+                            }
+                        },
+                        required: ["category_badge", "brand", "model", "specs", "reasoning", "estimated_price", "search_query"]
+                    }
+                };
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema,
+                        temperature: 0.4
+                    }
+                };
+
+                const apiKeyToUse = getActiveApiKey();
+                // Try gemini-3-flash-preview first (standard environment model), fallback to gemini-2.5-flash if needed
+                const modelsToTry = ['gemini-3-flash-preview', 'gemini-2.5-flash'];
+                let parsedResult = null;
+                let lastError = null;
+
+                for (const modelName of modelsToTry) {
+                    try {
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKeyToUse}`;
+                        const response = await fetchWithBackoff(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({}));
+                            throw new Error(errData?.error?.message || `HTTP Error ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        const textJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (textJson) {
+                            parsedResult = JSON.parse(textJson);
+                            break;
+                        }
+                    } catch (e) {
+                        lastError = e;
+                    }
+                }
+
+                if (!parsedResult || !Array.isArray(parsedResult) || parsedResult.length === 0) {
+                    throw lastError || new Error("Impossibile ottenere una risposta valida dall'API Gemini.");
+                }
+
+                lastRecommendations = parsedResult;
+                renderRecommendations(parsedResult);
+
+                // Show results section and scroll smoothly
+                const resultsSec = document.getElementById('resultsSection');
+                resultsSec.classList.remove('hidden');
+                setTimeout(() => {
+                    resultsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
+                showToast('Consigli elaborati con successo da Gemini!', 'success');
+
+            } catch (error) {
+                console.error('Errore chiamata Gemini:', error);
+                showToast(`Errore API: ${error.message}. Verifica la chiave API nell'header.`, 'error');
+            } finally {
+                clearInterval(statusInterval);
+                idleBox.classList.remove('hidden');
+                loadingBox.classList.add('hidden');
+                progressBar.style.width = '30%';
+            }
+        }
+
+        // ============================================================================
+        // 7. RENDERING DELLE SCHEDE RISULTATO E LINK DIRETTI E-COMMERCE
+        // ============================================================================
+        function getOfficialManufacturerInfo(brand, model) {
+            const combined = `${brand} ${model}`.toLowerCase();
+            for (const key in OFFICIAL_BRAND_URLS) {
+                if (combined.includes(key)) {
+                    return OFFICIAL_BRAND_URLS[key];
+                }
+            }
+            return {
+                name: `Sito Ufficiale ${brand}`,
+                url: `https://www.google.it/search?q=${encodeURIComponent(brand + ' ' + model + ' sito ufficiale italia')}`
+            };
+        }
+
+        function buildEcommerceLinks(searchQuery) {
+            const cleanQuery = searchQuery.trim();
+            const encodedStandard = encodeURIComponent(cleanQuery);
+            // TrovaPrezzi formats best with URL-encoded query or hyphenated lowercase
+            const encodedTrovaPrezzi = encodeURIComponent(cleanQuery.toLowerCase());
+
+            return [
+                {
+                    name: 'Amazon.it',
+                    badge: 'Top Scelta • Spedizione Rapida',
+                    url: `https://www.amazon.it/s?k=${encodedStandard}`,
+                    icon: 'fa-brands fa-amazon',
+                    style: 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-300'
+                },
+                {
+                    name: 'Unieuro',
+                    badge: 'Ritiro in Negozio / Online',
+                    url: `https://www.unieuro.it/online/search?q=${encodedStandard}`,
+                    icon: 'fa-solid fa-bag-shopping',
+                    style: 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200'
+                },
+                {
+                    name: 'MediaWorld',
+                    badge: 'Catena Tech Ufficiale',
+                    url: `https://www.mediaworld.it/it/search.html?query=${encodedStandard}`,
+                    icon: 'fa-solid fa-store',
+                    style: 'bg-rose-50 hover:bg-rose-100 text-rose-900 border-rose-200'
+                },
+                {
+                    name: 'eBay.it',
+                    badge: 'Nuovo e Ricondizionato',
+                    url: `https://www.ebay.it/sch/i.html?_nkw=${encodedStandard}`,
+                    icon: 'fa-brands fa-ebay',
+                    style: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200'
+                },
+                {
+                    name: 'TrovaPrezzi',
+                    badge: 'Comparatore Offerte IT',
+                    url: `https://www.trovaprezzi.it/prezzo_cellulari-smartphone_${encodedTrovaPrezzi}.aspx`,
+                    icon: 'fa-solid fa-tags',
+                    style: 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200'
+                }
+            ];
+        }
+
+        function renderRecommendations(phones) {
+            const grid = document.getElementById('recommendationsGrid');
+
+            const cardStyles = [
+                {
+                    border: 'border-brand-500 ring-2 ring-brand-500/20',
+                    headerBg: 'bg-gradient-to-r from-brand-600 to-indigo-700 text-white',
+                    badgeClass: 'bg-amber-300 text-amber-950'
+                },
+                {
+                    border: 'border-slate-200',
+                    headerBg: 'bg-slate-900 text-white',
+                    badgeClass: 'bg-emerald-400 text-emerald-950'
+                },
+                {
+                    border: 'border-slate-200',
+                    headerBg: 'bg-slate-800 text-white',
+                    badgeClass: 'bg-sky-300 text-sky-950'
+                }
+            ];
+
+            grid.innerHTML = phones.map((phone, idx) => {
+                const st = cardStyles[idx] || cardStyles[1];
+                const fullName = `${phone.brand} ${phone.model}`;
+                const queryToUse = phone.search_query || fullName;
+                const officialSite = getOfficialManufacturerInfo(phone.brand, phone.model);
+                const ecommerceLinks = buildEcommerceLinks(queryToUse);
+
+                return `
+                    <article class="bg-white rounded-3xl border-2 ${st.border} shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                        
+                        <div>
+                            <!-- Card Header -->
+                            <div class="${st.headerBg} p-5 sm:p-6">
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${st.badgeClass}">
+                                        ${escapeHtml(phone.category_badge || `Opzione #${idx + 1}`)}
+                                    </span>
+                                    <span class="text-xs font-semibold opacity-80">
+                                        #${idx + 1}
+                                    </span>
+                                </div>
+
+                                <div class="text-xs uppercase tracking-widest font-semibold opacity-80">
+                                    ${escapeHtml(phone.brand)}
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mt-0.5">
+                                    ${escapeHtml(phone.model)}
+                                </h3>
+
+                                <!-- Estimated Market Price Box -->
+                                <div class="mt-4 pt-3.5 border-t border-white/15 flex items-baseline justify-between">
+                                    <span class="text-xs font-medium opacity-85">Prezzo stimato mercato:</span>
+                                    <span class="text-xl font-extrabold text-amber-300">
+                                        ${escapeHtml(phone.estimated_price)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Card Body: Specs & Reasoning -->
+                            <div class="p-5 sm:p-6 space-y-5">
+                                
+                                <!-- Personalized AI Reasoning -->
+                                <div class="p-4 rounded-2xl bg-brand-50/60 border border-brand-100">
+                                    <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-brand-700 mb-1.5">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Perché è perfetto per Te
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                                        ${escapeHtml(phone.reasoning)}
+                                    </p>
+                                </div>
+
+                                <!-- Key Technical Specifications -->
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                                        Specifiche Tecniche Chiave
+                                    </h4>
+                                    <ul class="space-y-2.5 text-xs sm:text-sm">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-microchip text-xs"></i>
+                                            </span>
+                                            <div>
+                                                <span class="font-semibold text-slate-500 text-xs block">Processore</span>
+                                                <span class="font-bold text-slate-800">${escapeHtml(phone.specs?.processor || 'N/D')}</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-camera text-xs"></i>
+                                            </span>
+                                            <div>
+                                                <span class="font-semibold text-slate-500 text-xs block">Fotocamere</span>
+                                                <span class="font-bold text-slate-800">${escapeHtml(phone.specs?.camera || 'N/D')}</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-memory text-xs"></i>
+                                            </span>
+                                            <div>
+                                                <span class="font-semibold text-slate-500 text-xs block">RAM & Archiviazione</span>
+                                                <span class="font-bold text-slate-800">${escapeHtml(phone.specs?.ram_storage || 'N/D')}</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-battery-full text-xs"></i>
+                                            </span>
+                                            <div>
+                                                <span class="font-semibold text-slate-500 text-xs block">Batteria & Ricarica</span>
+                                                <span class="font-bold text-slate-800">${escapeHtml(phone.specs?.battery || 'N/D')}</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-mobile-screen text-xs"></i>
+                                            </span>
+                                            <div>
+                                                <span class="font-semibold text-slate-500 text-xs block">Display</span>
+                                                <span class="font-bold text-slate-800">${escapeHtml(phone.specs?.display || 'N/D')}</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Card Footer: Dove Trovarlo Online (Link Diretti di Ricerca) -->
+                        <div class="p-5 sm:p-6 bg-slate-50 border-t border-slate-200/80">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-cart-shopping text-brand-600"></i>
+                                    Dove Trovarlo Online
+                                </h4>
+                                <span class="text-[11px] text-slate-400 font-medium">Link Diretti</span>
+                            </div>
+
+                            <!-- Official Manufacturer Website Button -->
+                            <a
+                                href="${officialSite.url}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-full mb-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-between shadow-sm"
+                            >
+                                <span class="flex items-center gap-2 truncate">
+                                    <i class="fa-solid fa-globe text-brand-400"></i>
+                                    <span class="truncate">${escapeHtml(officialSite.name)}</span>
+                                </span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75 shrink-0"></i>
+                            </a>
+
+                            <!-- E-commerce Priority Search Links -->
+                            <div class="space-y-2">
+                                ${ecommerceLinks.map(store => `
+                                    <a
+                                        href="${store.url}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="w-full px-3.5 py-2 rounded-xl border ${store.style} transition flex items-center justify-between text-xs font-bold"
+                                    >
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <i class="${store.icon} text-sm w-4 text-center shrink-0"></i>
+                                            <div class="truncate">
+                                                <span>${store.name}</span>
+                                                <span class="block text-[10px] font-medium opacity-75">${store.badge}</span>
+                                            </div>
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold shrink-0 ml-2">
+                                            <span>Cerca</span>
+                                            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                        </span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // ============================================================================
+        // 8. AZIONI CONSULENTE (COPIA RIEPILOGO, MODIFICA FILTRI, NUOVA CONSULENZA)
+        // ============================================================================
+        function editCurrentFilters() {
+            goToStep(4);
+            document.getElementById('wizardSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function startNewConsultation() {
+            document.getElementById('resultsSection').classList.add('hidden');
+            resetWizard();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function copyResultsToClipboard() {
+            if (!lastRecommendations || lastRecommendations.length === 0) return;
+
+            const lines = [
+                "📱 CONSIGLI SMARTPHONE PERSONALIZZATI",
+                `Budget di riferimento: fino a €${wizardState.budget}`,
+                "----------------------------------------"
+            ];
+
+            lastRecommendations.forEach((p, idx) => {
+                lines.push(`\n${idx + 1}. ${p.brand} ${p.model} (${p.category_badge})`);
+                lines.push(`   Prezzo stimato: ${p.estimated_price}`);
+                lines.push(`   Specifiche: ${p.specs?.processor} | ${p.specs?.ram_storage} | ${p.specs?.camera}`);
+                lines.push(`   Perché sceglierlo: ${p.reasoning}`);
+                lines.push(`   Cerca su Amazon: https://www.amazon.it/s?k=${encodeURIComponent(p.search_query || (p.brand + ' ' + p.model))}`);
+            });
+
+            lines.push("\n💡 Consiglio: Ricordati che a Novembre c'è il Black Friday ed è il momento migliore per acquistarli al prezzo più basso dell'anno!");
+
+            const textToCopy = lines.join('\n');
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Riepilogo completo copiato negli appunti!', 'success');
+            } catch (e) {
+                showToast('Impossibile copiare automaticamente il testo.', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // ============================================================================
+        // 9. UTILITÀ & SISTEMA DI NOTIFICHE TOAST (NO ALERT)
+        // ============================================================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-emerald-900 text-white border-emerald-700',
+                warning: 'bg-amber-900 text-white border-amber-700',
+                error: 'bg-rose-900 text-white border-rose-700',
+                info: 'bg-slate-900 text-white border-slate-700'
+            };
+
+            const icons = {
+                success: 'fa-circle-check text-emerald-400',
+                warning: 'fa-triangle-exclamation text-amber-400',
+                error: 'fa-circle-xmark text-rose-400',
+                info: 'fa-circle-info text-brand-400'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.info} text-base shrink-0"></i>
+                <span class="flex-1">${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
+        }
+    </script>
+</body>
+</html>
